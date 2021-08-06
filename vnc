@@ -1,0 +1,21 @@
+#!/usr/bin/bash
+in=$1
+if [ $# -lt 1 ]; then
+echo -e ""
+printf "...{error}..."
+echo -e ""
+elif [ $in == start ]; then
+export USER=root
+export DISPLAY=:1
+tigervncserver -geometry 1250x850 -xstartup /usr/bin/startxfce4
+elif [ $in == stop ]; then
+vncserver -kill :1
+else
+
+echo -e ""
+printf "...{error}..."
+echo -e "....$in...."
+echo -e ""
+echo -e ""
+
+fi
