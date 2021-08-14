@@ -1,21 +1,52 @@
-#!/usr/bin/bash
-in=$1
-if [ $# -lt 1 ]; then
-echo -e ""
-printf "...{error}..."
-echo -e ""
-elif [ $in == start ]; then
-export USER=root
-export DISPLAY=:1
-tigervncserver -geometry 1250x850 -xstartup /usr/bin/startxfce4
-elif [ $in == stop ]; then
-vncserver -kill :1
-else
+#!/bin/bash
 
-echo -e ""
-printf "...{error}..."
-echo -e "....$in...."
-echo -e ""
-echo -e ""
-
-fi
+vnc_start() {
+    if [ ! -f ~/.vnc/passwd ]; then
+        vnc_passwd
+    fi
+    USR=$(whoami)
+    if [ $USR = "root" ]; then
+        SCR=:1
+    else
+        SCR=:2
+    fi
+        LD_PRELOAD=/lib/aarch64-linux-gnu/libgcc_s.so.1 vncserver -xstartup /usr/bin/startxfce4
+}
+vnc_stop() {
+    vncserver -kill :1
+    vncserver -kill :2
+    return $?
+}
+vnc_passwd() {
+    vncpasswd
+    return $?
+}
+vnc_status() {
+    session_list=$(vncserver -list)
+    if [[ $session_list == *"590"* ]]; then
+        echo "$session_list"
+    else
+        echo "there is nothing to list :)"
+        echo "you can start a new session by << vnc start >>"
+    fi
+}
+vnc_kill() {
+    pkill Xtigervnc
+    return $?
+}
+case "$1" in
+    start)
+        vnc_start
+        ;;
+    stop)
+        vnc_stop
+        ;;
+    status)
+        vnc_status
+        ;;
+    kill)
+        vnc_kill
+        ;;
+    *)
+        echo "[!] invalid input"
+esac
